@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 )
 
 type TranslateRequest struct {
@@ -14,7 +15,12 @@ type TranslateRequest struct {
 	Text   string `json:"text"`
 }
 
-func Translate(source, target, text, user, pass string) string {
+type Configuration struct {
+	Username string
+	Password string
+}
+
+func Translate(source, target, text string) string {
 	translateRequest := TranslateRequest{
 		Source: source,
 		Target: target,
@@ -22,14 +28,16 @@ func Translate(source, target, text, user, pass string) string {
 	}
 	requestData, _ := json.Marshal(translateRequest)
 
-	translateUrl := constructUrl(source, target)
+	translateUrl := "https://gateway.watsonplatform.net/language-translator/api/v2/translate"
 	req, err := http.NewRequest("POST", translateUrl, bytes.NewBuffer(requestData))
 	if err != nil {
 		log.Fatal("NewRequest: ", err)
 		return ""
 	}
 
-	req.SetBasicAuth(user, pass)
+	config := getCredentials()
+
+	req.SetBasicAuth(config.Username, config.Password)
 	req.Header.Add("content-type", "application/json")
 
 	client := &http.Client{}
@@ -49,7 +57,20 @@ func Translate(source, target, text, user, pass string) string {
 	return string(body)
 }
 
-func constructUrl(source, target string) string {
-	url := "https://gateway.watsonplatform.net/language-translator/api/v2/translate"
-	return url
+func getCredentials() Configuration {
+	file, err := os.Open("./conf.json")
+	if err != nil {
+		log.Fatal("No conf.json found!")
+	}
+	defer file.Close()
+
+	decoder := json.NewDecoder(file)
+
+	config := Configuration{}
+	err = decoder.Decode(&config)
+	if err != nil {
+		log.Fatal("Trouble reading config data")
+	}
+
+	return config
 }

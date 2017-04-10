@@ -10,9 +10,6 @@ import (
 	"strings"
 )
 
-var BLUEMIXUSER string
-var BLUEMIXPASS string
-
 type Client struct {
 	conn     net.Conn
 	ch       chan string
@@ -34,8 +31,6 @@ func check(err error) {
 
 func main() {
 	address := flag.String("addr", "localhost:8080", "{host}:{port} to listen on")
-	flag.StringVar(&BLUEMIXUSER, "user", "", "bluemix username")
-	flag.StringVar(&BLUEMIXPASS, "pass", "", "bluemix password")
 	flag.Parse()
 
 	listener, err := net.Listen("tcp", *address)
@@ -118,7 +113,7 @@ func printMessages(msgchan <-chan RawMessage, addchan <-chan Client, rmchan <-ch
 				if lang == msg.language {
 					translated = fmt.Sprintf("%s: %s", msg.nick, msg.msg)
 				} else {
-					tr := Translate(msg.language, lang, msg.msg, BLUEMIXUSER, BLUEMIXPASS)
+					tr := Translate(msg.language, lang, msg.msg)
 					translated = fmt.Sprintf("%s: %s", msg.nick, tr)
 				}
 				for _, ch := range clientsByLanguage[lang] {
