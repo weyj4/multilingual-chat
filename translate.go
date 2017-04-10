@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -51,6 +50,6 @@ func Translate(source, target, text, user, pass string) string {
 }
 
 func constructUrl(source, target string) string {
-	url := fmt.Sprintf("https://gateway.watsonplatform.net/language-translator/api/v2/translate?source=%s&target=%s", source, target)
+	url := "https://gateway.watsonplatform.net/language-translator/api/v2/translate"
 	return url
 }
